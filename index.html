@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Management Approver Quiz — Supplier Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#14304F;
+    --navy-deep:#0D2238;
+    --paper:#F7F8FA;
+    --card:#FFFFFF;
+    --line:#E1E5EA;
+    --ink:#1D2733;
+    --ink-soft:#5B6675;
+    --esc:#D65B2A;
+    --good:#2E8B6E;
+    --bad:#D66A6A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    font-family:'Noto Sans',sans-serif;
+    color:var(--ink);
+    padding:48px 20px 64px;
+  }
+  .wrap{max-width:680px;margin:0 auto;}
+
+  .eyebrow{
+    font-family:'Noto Sans',sans-serif;
+    font-size:12px;font-weight:700;
+    letter-spacing:.05em;text-transform:uppercase;
+    color:var(--esc);
+    margin:0 0 8px;
+  }
+  h1{
+    font-family:'Noto Sans',sans-serif;
+    font-weight:700;
+    font-size:clamp(24px,4vw,30px);
+    color:var(--navy-deep);
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  p.subtitle{
+    font-size:15px;
+    color:var(--ink-soft);
+    margin:0 0 32px;
+    line-height:1.55;
+    max-width:560px;
+  }
+
+  .progress-row{
+    display:flex;align-items:center;gap:12px;
+    margin-bottom:24px;
+  }
+  .progress-track{
+    flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;background:var(--esc);border-radius:4px;
+    transition:width .35s ease;
+  }
+  .progress-label{
+    font-family:'Noto Sans',sans-serif;
+    font-size:12.5px;font-weight:700;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px 26px;
+    animation:fadein .3s ease forwards;
+  }
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .q-count{
+    font-family:'Noto Sans',sans-serif;
+    font-size:11.5px;font-weight:700;
+    color:var(--esc);
+    text-transform:uppercase;letter-spacing:.04em;
+    margin:0 0 10px;
+  }
+  .q-prompt{
+    font-family:'Noto Sans',sans-serif;
+    font-size:18px;font-weight:600;
+    color:var(--navy-deep);
+    line-height:1.4;
+    margin:0 0 20px;
+  }
+
+  .hint-toggle{
+    display:inline-block;
+    font-size:12.5px;font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    margin:-10px 0 18px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .hint-box{
+    display:none;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    background:var(--paper);
+    border-left:3px solid var(--esc);
+    padding:10px 14px;
+    border-radius:6px;
+    margin:-6px 0 18px;
+  }
+  .hint-box.show{display:block;}
+
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .option{
+    text-align:left;
+    padding:13px 16px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    background:var(--card);
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .option:hover:not(:disabled){border-color:var(--esc);transform:translateY(-1px);}
+  .option:disabled{cursor:default;}
+
+  .option.correct{
+    border-color:var(--good);
+    background:#EAF6F1;
+    color:#1D5A44;
+    font-weight:600;
+  }
+  .option.incorrect{
+    border-color:var(--bad);
+    background:#FBEDED;
+    color:#8A2F2F;
+    font-weight:600;
+  }
+  .option.dim{opacity:.55;}
+
+  .feedback{
+    margin-top:18px;
+    padding:14px 16px;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.55;
+    display:none;
+  }
+  .feedback.show{display:block;animation:fadein .25s ease forwards;}
+  .feedback.correct-fb{background:#EAF6F1;color:#1D5A44;}
+  .feedback.incorrect-fb{background:#FBEDED;color:#8A2F2F;}
+  .feedback b{font-family:'Noto Sans',sans-serif;}
+
+  .next-btn{
+    margin-top:20px;
+    display:none;
+    font-family:'Noto Sans',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:#fff;
+    background:var(--navy-deep);
+    border:none;
+    border-radius:10px;
+    padding:12px 22px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .next-btn:hover{background:#0A1B2C;}
+  .next-btn.show{display:inline-block;}
+
+
+  /* results screen */
+  .results{text-align:center;padding:12px 4px 4px;}
+  .results-score{
+    font-family:'Noto Sans',sans-serif;font-weight:700;font-size:48px;
+    color:var(--navy-deep);margin:6px 0 4px;
+  }
+  .results-score span{font-size:22px;color:var(--ink-soft);font-weight:600;}
+  .results-msg{font-size:15px;color:var(--ink-soft);margin:0 0 26px;line-height:1.55;}
+  .retake-btn{
+    font-family:'Noto Sans',sans-serif;font-weight:700;font-size:14px;
+    color:var(--navy-deep);background:#fff;border:1.5px solid var(--navy-deep);
+    border-radius:10px;padding:11px 22px;cursor:pointer;
+  }
+  .retake-btn:hover{background:var(--paper);}
+  .results-list{text-align:left;margin-top:28px;display:flex;flex-direction:column;gap:10px;}
+  .results-row{
+    display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--ink-soft);
+    padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+  }
+  .results-row .mark{
+    flex-shrink:0;width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:#fff;margin-top:1px;
+  }
+  .mark.ok{background:var(--good);}
+  .mark.no{background:var(--bad);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">For Approvers</p>
+  <h1>Top Management Approver Quiz</h1>
+  <p class="subtitle">A quick check on your role as approver when a supplier onboarding request is escalated to Top Management.</p>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">Question 1 of 3</div>
+  </div>
+
+  <div class="card" id="quizCard"></div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    prompt: "True or False: Approving a risk escalation for a supplier onboarding directly from an email notification is an acceptable shortcut when you are in a hurry.",
+    hint: "Escalations are key control points. Think about where you should review the full picture before deciding.",
+    options: [
+      "True",
+      "False"
+    ],
+    correct: 1,
+    correctFeedback: "Correct.",
+    incorrectFeedback: "Not quite — this is not a shortcut you can take.",
+    explanation: "An escalation is a key control point. The decision must be taken after reviewing the supplier record and its assessments, never as a quick approval from an email notification, even when you are in a hurry."
+  },
+  {
+    prompt: "At Gate 1, the Local Compliance Officer (LCO) recommendation is a no-go. Who can escalate the request to Top Management, and on what basis?",
+    options: [
+      "Procurement, whenever the supplier's paperwork is incomplete",
+      "The Data Steward, once the supplier record is validated",
+      "The Requester, if they believe the supplier is critical for the business",
+      "Anyone in the company, at any stage of onboarding"
+    ],
+    correct: 2,
+    correctFeedback: "Exactly right.",
+    incorrectFeedback: "Not quite — check who owns the escalation.",
+    explanation: "After a no-go from the LCO, the Requester can either accept it or escalate to Top Management if they believe the supplier is critical for the business."
+  },
+  {
+    prompt: "As Top Management, which decisions can you make on a Gate 1 escalation?",
+    options: [
+      "Only approve, since the LCO no-go cannot be rejected",
+      "Send the supplier back to Procurement for re-validation",
+      "Delay the decision until Gate 2 is complete",
+      "Reject the supplier creation (end of process) or approve it, closing the Gate 1 check"
+    ],
+    correct: 3,
+    correctFeedback: "That's it.",
+    incorrectFeedback: "Close, but review the two possible outcomes.",
+    explanation: "Top Management either rejects the supplier creation, which ends the process, or approves it, which closes the Gate 1 check and lets the process continue."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+const userAnswers = [];
+
+const card = document.getElementById("quizCard");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+
+function updateProgress(){
+  const pct = (current / QUESTIONS.length) * 100;
+  progressFill.style.width = pct + "%";
+  progressLabel.textContent = current < QUESTIONS.length
+    ? `Question ${current + 1} of ${QUESTIONS.length}`
+    : `Complete`;
+}
+
+function renderQuestion(){
+  answered = false;
+  const q = QUESTIONS[current];
+  updateProgress();
+
+  card.innerHTML = `
+    <p class="q-count">Question ${current + 1} of ${QUESTIONS.length}</p>
+    <p class="q-prompt">${q.prompt}</p>
+    ${q.hint ? `<div class="hint-toggle" id="hintToggle">Show hint</div><div class="hint-box" id="hintBox">${q.hint}</div>` : ""}
+    <div class="options" id="optionsWrap">
+      ${q.options.map((opt, i) => `<button class="option" data-i="${i}">${opt}</button>`).join("")}
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn">${current === QUESTIONS.length - 1 ? "See results" : "Next question"}</button>
+  `;
+
+  const hintToggle = document.getElementById("hintToggle");
+  const hintBox = document.getElementById("hintBox");
+  if(hintToggle){
+    hintToggle.addEventListener("click", () => {
+      hintBox.classList.toggle("show");
+      hintToggle.textContent = hintBox.classList.contains("show") ? "Hide hint" : "Show hint";
+    });
+  }
+
+  document.querySelectorAll(".option").forEach(btn => {
+    btn.addEventListener("click", () => selectOption(parseInt(btn.dataset.i)));
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    current++;
+    if(current < QUESTIONS.length){
+      renderQuestion();
+    } else {
+      renderResults();
+    }
+  });
+}
+
+function selectOption(i){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[current];
+  const isCorrect = i === q.correct;
+  if(isCorrect) score++;
+  userAnswers.push(isCorrect);
+
+  document.querySelectorAll(".option").forEach((btn, idx) => {
+    btn.disabled = true;
+    if(idx === q.correct){
+      btn.classList.add("correct");
+    } else if(idx === i){
+      btn.classList.add("incorrect");
+    } else {
+      btn.classList.add("dim");
+    }
+  });
+
+  const fb = document.getElementById("feedback");
+  fb.classList.add("show", isCorrect ? "correct-fb" : "incorrect-fb");
+  fb.innerHTML = `<b>${isCorrect ? q.correctFeedback : q.incorrectFeedback}</b><br>${q.explanation}`;
+
+  const nb = document.getElementById("nextBtn");
+  if(nb) nb.classList.add("show");
+}
+
+function renderResults(){
+  updateProgress();
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  let msg;
+  if(pct < 60) msg = "Worth another pass through the escalation steps before you're on approval duty.";
+  else if(pct < 100) msg = "Good understanding overall — review the missed points below.";
+  else msg = "Perfect score — you're ready for approval duty.";
+
+  card.innerHTML = `
+    <div class="results">
+      <p class="q-count">Quiz complete</p>
+      <div class="results-score">${score}<span>/${QUESTIONS.length}</span></div>
+      <p class="results-msg">${msg}</p>
+      <button class="retake-btn" id="retakeBtn">Retake quiz</button>
+      <div class="results-list">
+        ${QUESTIONS.map((q, i) => `
+          <div class="results-row">
+            <span class="mark ${userAnswers[i] ? "ok" : "no"}">${userAnswers[i] ? "✓" : "✕"}</span>
+            <span>${q.prompt}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
+  document.getElementById("retakeBtn").addEventListener("click", () => {
+    current = 0;
+    score = 0;
+    userAnswers.length = 0;
+    renderQuestion();
+  });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
